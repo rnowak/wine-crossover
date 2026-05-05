@@ -64,30 +64,22 @@ jobs:
           sed -i '' '/^#endif$/d' "$WINEMAC/d3dmetal_objc.h"
 
           # d3dmetal_objc.m — add stub @implementation for arm64
-          # Remove final #endif, append #else with stubs, close with #endif
           sed -i '' '$ s/^#endif$//' "$WINEMAC/d3dmetal_objc.m"
-          cat >> "$WINEMAC/d3dmetal_objc.m" << 'EOF'
-#else
-
-#import <QuartzCore/QuartzCore.h>
-#import "d3dmetal_objc.h"
-
-@implementation WineMetalLayer
-@end
-
-#endif
-EOF
+          printf '%s\n' \
+            '#else' '' \
+            '#import <QuartzCore/QuartzCore.h>' \
+            '#import "d3dmetal_objc.h"' '' \
+            '@implementation WineMetalLayer' \
+            '@end' '' \
+            '#endif' >> "$WINEMAC/d3dmetal_objc.m"
 
           # d3dmetal.c — add stub macdrv_client_surface_presented for arm64
           sed -i '' '$ s/^#endif$//' "$WINEMAC/d3dmetal.c"
-          cat >> "$WINEMAC/d3dmetal.c" << 'EOF'
-#else
-
-#include "macdrv_cocoa.h"
-void macdrv_client_surface_presented(const macdrv_event *event) { }
-
-#endif
-EOF
+          printf '%s\n' \
+            '#else' '' \
+            '#include "macdrv_cocoa.h"' \
+            'void macdrv_client_surface_presented(const macdrv_event *event) { }' '' \
+            '#endif' >> "$WINEMAC/d3dmetal.c"
 
           echo "Patched: added arm64 stubs for D3DMetal symbols"
 
